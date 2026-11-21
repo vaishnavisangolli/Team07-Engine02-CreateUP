@@ -1,0 +1,521 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creatup | Organization Dashboard</title>
+
+<style>
+:root {
+    --purple:#7621d4;
+    --light:#eee5ff;
+    --dark:#190b32;
+    --bg:#f7f5ff;
+    --border:#e7def5;
+    --muted:#746b85;
+    --green:#16a34a;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#eeeaf7;color:#18122d}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+
+.dashboard{display:flex;min-height:100vh}
+.sidebar{
+    width:230px;background:linear-gradient(180deg,#170b2d,#32145b);
+    color:white;padding:25px 15px;position:fixed;height:100vh;overflow-y:auto
+}
+.brand{text-align:center;font-size:28px;font-weight:bold;margin-bottom:5px}
+.brand span{color:#bd8cff}
+.subtitle{text-align:center;font-size:11px;color:#d7c9f3;margin-bottom:30px}
+.menu a{
+    display:flex;align-items:center;gap:12px;padding:13px;
+    color:#e8defa;text-decoration:none;border-radius:10px;
+    margin-bottom:7px;cursor:pointer
+}
+.menu a:hover,.menu a.active{background:#7621d4;color:white}
+.count{margin-left:auto;background:#a43cff;padding:3px 7px;border-radius:20px;font-size:11px}
+
+.main{margin-left:230px;width:calc(100% - 230px)}
+.topbar{
+    height:65px;display:flex;align-items:center;padding:0 25px;
+    gap:20px;background:white;border-bottom:1px solid var(--border);
+    position:sticky;top:0;z-index:10
+}
+.search-box{flex:1;max-width:550px;display:flex;gap:10px;background:#f0eaff;padding:12px 15px;border-radius:10px}
+.search-box input{background:transparent;border:none;outline:none;width:100%}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:12px}
+.avatar{width:38px;height:38px;border-radius:50%;background:#7621d4;color:white;display:grid;place-items:center;font-weight:bold}
+.content{padding:22px}
+.page{display:none}
+.page.active{display:block}
+
+.hero{
+    background:linear-gradient(110deg,#eadcff,#c99afa);
+    border-radius:17px;padding:25px;margin-bottom:20px
+}
+.hero h1{font-size:26px;margin-bottom:8px}
+.hero p{margin-bottom:18px;line-height:1.6}
+.btn{background:var(--purple);color:white;border:none;padding:11px 17px;border-radius:9px;font-weight:bold}
+.btn:hover{background:#5815a6}
+.outline{background:white;color:var(--purple);border:1px solid var(--purple)}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:20px}
+.stat{background:white;border:1px solid var(--border);border-radius:14px;padding:18px}
+.stat small{color:var(--muted);display:block;margin-bottom:7px}
+.stat strong{font-size:25px}
+.stat-icon{font-size:22px;color:var(--purple);margin-bottom:8px}
+.green{color:var(--green);font-size:12px}
+
+.grid{display:grid;grid-template-columns:1.2fr 1fr;gap:18px}
+.panel{background:white;border:1px solid var(--border);border-radius:15px;padding:18px;margin-bottom:18px}
+.panel-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}
+.panel-header h2{font-size:18px}
+.link{color:var(--purple);cursor:pointer;font-weight:bold;font-size:12px}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{margin-bottom:13px}
+.form-group label{display:block;font-size:13px;font-weight:bold;margin-bottom:7px}
+.form-group input,.form-group select,.form-group textarea{
+    width:100%;padding:11px;border:1px solid var(--border);border-radius:8px;background:white
+}
+.form-group textarea{resize:vertical}
+.full{grid-column:1/-1}
+
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:600px}
+th,td{text-align:left;padding:13px;border-bottom:1px solid #eee;font-size:13px}
+th{background:#f7f3ff;color:#5b4778}
+.status{padding:6px 10px;border-radius:20px;font-size:11px;background:#eee5ff;color:#7621d4}
+.status.Shortlisted{background:#dcfce7;color:#15803d}
+.status.Hired{background:#dbeafe;color:#1d4ed8}
+.status.Rejected{background:#fee2e2;color:#b91c1c}
+.status.Under-Review{background:#fef3c7;color:#92400e}
+
+.small-btn{padding:7px 10px;border:1px solid var(--purple);color:var(--purple);background:white;border-radius:7px;margin:2px;font-size:12px}
+.small-btn:hover{background:var(--purple);color:white}
+
+.talent-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.talent-card{border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}
+.talent-avatar{width:65px;height:65px;border-radius:50%;background:linear-gradient(135deg,#cdaaff,#7621d4);color:white;display:grid;place-items:center;font-size:22px;margin:0 auto 10px}
+.talent-card h3{font-size:15px;margin-bottom:5px}
+.talent-card p{font-size:12px;color:var(--muted);margin:7px 0}
+.tag{display:inline-block;background:var(--light);color:#6824a9;border-radius:20px;padding:5px 9px;font-size:11px;margin:3px}
+
+.activity{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #eee;font-size:13px}
+.activity:last-child{border:none}
+.activity-icon{width:38px;height:38px;border-radius:50%;background:var(--light);display:grid;place-items:center;color:var(--purple);flex-shrink:0}
+.activity small{display:block;color:var(--muted);margin-top:5px}
+
+.bar{height:10px;background:#eee;border-radius:10px;margin:10px 0 18px;overflow:hidden}
+.bar div{height:100%;background:linear-gradient(90deg,#7621d4,#b78aff);border-radius:10px}
+
+.modal{position:fixed;inset:0;background:#16082b88;display:none;align-items:center;justify-content:center;z-index:100;padding:15px}
+.modal.show{display:flex}
+.modal-content{background:white;padding:25px;border-radius:16px;width:100%;max-width:500px;max-height:90vh;overflow:auto}
+.modal-content h2{margin-bottom:15px}
+.close{float:right;background:none;border:none;font-size:22px}
+.toast{position:fixed;bottom:25px;right:25px;background:#24103f;color:white;padding:14px 20px;border-radius:10px;display:none;z-index:200}
+
+@media(max-width:1100px){
+.stats{grid-template-columns:repeat(2,1fr)}
+.grid{grid-template-columns:1fr}
+.talent-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:700px){
+.sidebar{width:100%;height:auto;position:relative}
+.dashboard{display:block}
+.main{width:100%;margin:0}
+.menu{display:flex;flex-wrap:wrap}
+.menu a{padding:8px;font-size:12px}
+.topbar{height:auto;padding:12px;flex-wrap:wrap}
+.content{padding:12px}
+.form-grid{grid-template-columns:1fr}
+.full{grid-column:auto}
+.talent-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+
+<div class="dashboard">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+<div class="brand"><span>✦</span> Creatup</div>
+<div class="subtitle">A Talent-to-Opportunity Platform</div>
+
+<nav class="menu">
+<a class="active" data-page="overview">⌂ Overview</a>
+<a data-page="orgprofile">▣ Organization Profile</a>
+<a data-page="post">＋ Post Opportunity</a>
+<a data-page="manage">▤ Manage Opportunities</a>
+<a data-page="talent">♙ Discover Talent</a>
+<a data-page="applications">▱ Applications <span class="count" id="appBadge">3</span></a>
+<a data-page="messages">▢ Messages <span class="count">5</span></a>
+<a data-page="analytics">▥ Analytics</a>
+<a data-page="settings">⚙ Settings</a>
+</nav>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+<header class="topbar">
+<div class="search-box">🔍
+<input id="globalSearch" placeholder="Search talent, skills, or portfolios...">
+</div>
+<div class="top-actions">
+<button class="small-btn" onclick="notify()">🔔</button>
+<div class="avatar">PF</div>
+<strong id="orgNameTop">PixelFrame Agency</strong>
+</div>
+</header>
+
+<div class="content">
+
+<!-- OVERVIEW -->
+<section class="page active" id="overview">
+
+<div class="hero">
+<h1>Welcome, PixelFrame Agency! 👋</h1>
+<p>Find creative talent, manage opportunities, and build your next big project.</p>
+<button class="btn" onclick="navigate('post')">＋ Post an Opportunity</button>
+</div>
+
+<div class="stats">
+<div class="stat"><div class="stat-icon">♙</div><small>Total Applicants</small><strong id="totalApplicants">132</strong><br><span class="green">↑ +17%</span></div>
+<div class="stat"><div class="stat-icon">▣</div><small>Active Opportunities</small><strong id="activeCount">8</strong></div>
+<div class="stat"><div class="stat-icon">♙</div><small>Shortlisted</small><strong id="shortCount">26</strong></div>
+<div class="stat"><div class="stat-icon">✓</div><small>Hired</small><strong id="hiredCount">5</strong></div>
+</div>
+
+<div class="grid">
+<div class="panel">
+<div class="panel-header">
+<h2>Recent Applications</h2>
+<span class="link" onclick="navigate('applications')">View All →</span>
+</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Candidate</th><th>Opportunity</th><th>Status</th><th>Action</th></tr></thead>
+<tbody id="recentApps"></tbody>
+</table>
+</div>
+</div>
+
+<div class="panel">
+<div class="panel-header"><h2>Recommended Talent</h2><span class="link" onclick="navigate('talent')">View All →</span></div>
+<div class="talent-grid" id="recommendedTalent"></div>
+</div>
+</div>
+</section>
+
+<!-- ORGANIZATION PROFILE -->
+<section class="page" id="orgprofile">
+<div class="panel">
+<div class="panel-header"><h2>Organization Profile</h2></div>
+<form id="orgForm">
+<div class="form-grid">
+<div class="form-group"><label>Organization Name</label><input id="orgName" value="PixelFrame Agency" required></div>
+<div class="form-group"><label>Industry</label><select id="orgIndustry"><option>Media & Entertainment</option><option>Advertising</option><option>Marketing</option><option>Music</option><option>Photography</option></select></div>
+<div class="form-group"><label>Email</label><input id="orgEmail" type="email" value="contact@pixelframe.com"></div>
+<div class="form-group"><label>Location</label><input id="orgLocation" value="Bengaluru, India"></div>
+<div class="form-group full"><label>About Organization</label><textarea id="orgAbout" rows="4">A creative agency working on photography, advertising, branding and visual storytelling projects.</textarea></div>
+<div class="form-group full"><label>Website</label><input id="orgWebsite" placeholder="https://yourwebsite.com"></div>
+</div>
+<button class="btn">Save Profile</button>
+</form>
+</div>
+</section>
+
+<!-- POST OPPORTUNITY -->
+<section class="page" id="post">
+<div class="panel">
+<div class="panel-header"><h2>Post a New Opportunity</h2></div>
+<form id="opportunityForm">
+<div class="form-grid">
+<div class="form-group"><label>Opportunity Title</label><input id="opTitle" placeholder="e.g. Event Photographer" required></div>
+<div class="form-group"><label>Category</label><select id="opCategory" required><option value="">Select Category</option><option>Photography</option><option>Videography</option><option>Graphic Design</option><option>Music</option><option>Marketing</option><option>Advertising</option><option>Entertainment</option></select></div>
+<div class="form-group"><label>Work Type</label><select id="opType"><option>Freelance</option><option>Project-Based</option><option>Part-Time</option><option>Full-Time</option></select></div>
+<div class="form-group"><label>Location</label><input id="opLocation" placeholder="Remote / Bengaluru"></div>
+<div class="form-group"><label>Budget / Payment</label><input id="opBudget" placeholder="e.g. ₹5,000 - ₹10,000"></div>
+<div class="form-group"><label>Application Deadline</label><input id="opDeadline" type="date" required></div>
+<div class="form-group full"><label>Description</label><textarea id="opDescription" rows="4" placeholder="Describe the work, requirements and expectations..." required></textarea></div>
+<div class="form-group full"><label>Required Skills</label><input id="opSkills" placeholder="Photography, Editing, Photoshop..."></div>
+</div>
+<button class="btn">Publish Opportunity</button>
+</form>
+</div>
+</section>
+
+<!-- MANAGE OPPORTUNITIES -->
+<section class="page" id="manage">
+<div class="panel">
+<div class="panel-header"><h2>Manage Opportunities</h2><button class="btn" onclick="navigate('post')">+ Post New</button></div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Opportunity</th><th>Category</th><th>Applicants</th><th>Status</th><th>Action</th></tr></thead>
+<tbody id="opTable"></tbody>
+</table>
+</div>
+</div>
+</section>
+
+<!-- DISCOVER TALENT -->
+<section class="page" id="talent">
+<div class="panel">
+<div class="panel-header"><h2>Discover Creative Talent</h2></div>
+<div class="form-group"><input id="talentSearch" placeholder="Search by name, skill or category..." oninput="renderTalent()"></div>
+<div class="form-group"><select id="talentCategory" onchange="renderTalent()"><option value="">All Categories</option><option>Photography</option><option>Videography</option><option>Graphic Design</option><option>Music</option><option>Marketing</option></select></div>
+<div class="talent-grid" id="talentGrid"></div>
+</div>
+</section>
+
+<!-- APPLICATIONS -->
+<section class="page" id="applications">
+<div class="panel">
+<div class="panel-header"><h2>Applications</h2></div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Candidate</th><th>Role</th><th>Portfolio</th><th>Status</th><th>Actions</th></tr></thead>
+<tbody id="applicationsTable"></tbody>
+</table>
+</div>
+</div>
+</section>
+
+<!-- MESSAGES -->
+<section class="page" id="messages">
+<div class="panel">
+<div class="panel-header"><h2>Messages</h2></div>
+<div class="activity">💬 &nbsp; Rohan K — Interested in Event Photography opportunity.</div>
+<div class="activity">💬 &nbsp; Megha S — Shared a new graphic design portfolio.</div>
+<div class="activity">💬 &nbsp; Srushti R — Available for upcoming projects.</div>
+</div>
+</section>
+
+<!-- ANALYTICS -->
+<section class="page" id="analytics">
+<div class="panel">
+<div class="panel-header"><h2>Organization Analytics</h2></div>
+<h3>Application Statistics</h3>
+<p>Total Applicants: <b id="analyticsApplicants">132</b></p>
+<div class="bar"><div style="width:80%"></div></div>
+<p>Shortlisted Candidates</p>
+<div class="bar"><div style="width:55%"></div></div>
+<p>Successful Hires</p>
+<div class="bar"><div style="width:30%"></div></div>
+<p>Opportunity Engagement</p>
+<div class="bar"><div style="width:70%"></div></div>
+</div>
+</section>
+
+<!-- SETTINGS -->
+<section class="page" id="settings">
+<div class="panel">
+<div class="panel-header"><h2>Settings</h2></div>
+<div class="form-group"><label>Email Notifications</label><input type="checkbox" checked></div>
+<div class="form-group"><label>Organization Visibility</label><select><option>Public</option><option>Private</option></select></div>
+<button class="btn" onclick="notify('Settings saved!')">Save Settings</button>
+</div>
+</section>
+
+</div>
+</main>
+</div>
+
+<!-- TALENT DETAILS MODAL -->
+<div class="modal" id="talentModal">
+<div class="modal-content">
+<button class="close" onclick="closeModal()">×</button>
+<h2 id="modalTalentName"></h2>
+<p id="modalTalentDetails"></p>
+<br>
+<button class="btn" onclick="notify('Message sent successfully!')">Send Message</button>
+<button class="btn outline" onclick="closeModal()">Close</button>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+
+/* SAMPLE TALENT */
+let talents=[
+{id:1,name:"Srushti R",category:"Photography",skills:"Photography, Editing",rating:4.8,initials:"SR"},
+{id:2,name:"Vaishnavi S",category:"Graphic Design",skills:"Photoshop, Branding",rating:4.7,initials:"VS"},
+{id:3,name:"Srishti N",category:"Music",skills:"Music Production",rating:4.9,initials:"SN"},
+{id:4,name:"Rohan K",category:"Videography",skills:"Video Editing, Camera",rating:4.6,initials:"RK"},
+{id:5,name:"Megha S",category:"Graphic Design",skills:"Illustration, Design",rating:4.8,initials:"MS"},
+{id:6,name:"Adarsh P",category:"Music",skills:"Composition, Mixing",rating:4.5,initials:"AP"}
+];
+
+/* SAMPLE APPLICATIONS */
+let applications=[
+{id:1,name:"Rohan K",role:"Event Coverage",portfolio:"Video Portfolio",status:"Shortlisted"},
+{id:2,name:"Megha S",role:"Brand Campaign",portfolio:"Design Portfolio",status:"Under Review"},
+{id:3,name:"Adarsh P",role:"Short Film",portfolio:"Music Portfolio",status:"Applied"}
+];
+
+/* SAMPLE OPPORTUNITIES */
+let opportunities=[
+{id:101,title:"Event Photographer",category:"Photography",applicants:25,status:"Active"},
+{id:102,title:"Brand Campaign Designer",category:"Graphic Design",applicants:42,status:"Active"},
+{id:103,title:"Short Film Music Composer",category:"Music",applicants:18,status:"Active"},
+{id:104,title:"Video Editor",category:"Videography",applicants:30,status:"Active"}
+];
+
+/* NAVIGATION */
+function navigate(page){
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+document.getElementById(page).classList.add("active");
+document.querySelectorAll("[data-page]").forEach(a=>a.classList.remove("active"));
+document.querySelector(`[data-page="${page}"]`)?.classList.add("active");
+
+if(page==="talent")renderTalent();
+if(page==="applications")renderApplications();
+if(page==="manage")renderManage();
+window.scrollTo({top:0,behavior:"smooth"});
+}
+document.querySelectorAll("[data-page]").forEach(a=>a.onclick=()=>navigate(a.dataset.page));
+
+/* TALENT CARDS */
+function talentCard(t){
+return `<div class="talent-card">
+<div class="talent-avatar">${t.initials}</div>
+<h3>${t.name}</h3>
+<p>${t.category}</p>
+<span class="tag">⭐ ${t.rating}</span>
+<p>${t.skills}</p>
+<button class="small-btn" onclick="viewTalent(${t.id})">View Profile</button>
+<button class="small-btn" onclick="shortlistTalent(${t.id})">Shortlist</button>
+</div>`;
+}
+function renderTalent(){
+let q=(document.getElementById("talentSearch")?.value||"").toLowerCase();
+let c=document.getElementById("talentCategory")?.value||"";
+let filtered=talents.filter(t=>
+(!q||t.name.toLowerCase().includes(q)||t.skills.toLowerCase().includes(q)||t.category.toLowerCase().includes(q))&&
+(!c||t.category===c)
+);
+document.getElementById("talentGrid").innerHTML=filtered.map(talentCard).join("")||"<p>No talent found.</p>";
+}
+function viewTalent(id){
+let t=talents.find(t=>t.id===id);
+document.getElementById("modalTalentName").textContent=t.name;
+document.getElementById("modalTalentDetails").textContent=t.category+" | "+t.skills+" | Rating "+t.rating;
+document.getElementById("talentModal").classList.add("show");
+}
+function closeModal(){document.getElementById("talentModal").classList.remove("show")}
+function shortlistTalent(id){
+let t=talents.find(t=>t.id===id);
+if(!applications.some(a=>a.name===t.name)){
+applications.push({id:Date.now(),name:t.name,role:"Talent Shortlist",portfolio:"Portfolio",status:"Shortlisted"});
+}
+renderApplications();
+notify(t.name+" shortlisted!");
+}
+
+/* APPLICATIONS */
+function renderApplications(){
+document.getElementById("applicationsTable").innerHTML=applications.map(a=>`
+<tr>
+<td><b>${a.name}</b></td>
+<td>${a.role}</td>
+<td>${a.portfolio}</td>
+<td><span class="status ${a.status.replace(" ","-")}">${a.status}</span></td>
+<td>
+<button class="small-btn" onclick="changeStatus(${a.id},'Shortlisted')">Shortlist</button>
+<button class="small-btn" onclick="changeStatus(${a.id},'Hired')">Hire</button>
+<button class="small-btn" onclick="changeStatus(${a.id},'Rejected')">Reject</button>
+</td>
+</tr>`).join("");
+document.getElementById("recentApps").innerHTML=applications.slice(0,3).map(a=>`
+<tr><td>${a.name}</td><td>${a.role}</td><td>${a.status}</td><td><button class="small-btn" onclick="navigate('applications')">View</button></td></tr>`).join("");
+document.getElementById("appBadge").textContent=applications.length;
+document.getElementById("totalApplicants").textContent=132+applications.length;
+document.getElementById("analyticsApplicants").textContent=132+applications.length;
+document.getElementById("shortCount").textContent=applications.filter(a=>a.status==="Shortlisted").length+26;
+document.getElementById("hiredCount").textContent=applications.filter(a=>a.status==="Hired").length+5;
+}
+function changeStatus(id,status){
+let a=applications.find(a=>a.id===id);
+if(a){a.status=status;renderApplications();notify(a.name+" marked "+status);}
+}
+
+/* OPPORTUNITY MANAGEMENT */
+function renderManage(){
+document.getElementById("opTable").innerHTML=opportunities.map(o=>`
+<tr>
+<td><b>${o.title}</b></td>
+<td>${o.category}</td>
+<td>${o.applicants}</td>
+<td><span class="status">${o.status}</span></td>
+<td><button class="small-btn" onclick="toggleOpportunity(${o.id})">${o.status==="Active"?"Close":"Activate"}</button>
+<button class="small-btn" onclick="deleteOpportunity(${o.id})">Delete</button></td>
+</tr>`).join("");
+document.getElementById("activeCount").textContent=opportunities.filter(o=>o.status==="Active").length;
+}
+function toggleOpportunity(id){
+let o=opportunities.find(o=>o.id===id);
+o.status=o.status==="Active"?"Closed":"Active";
+renderManage();notify("Opportunity status updated");
+}
+function deleteOpportunity(id){
+opportunities=opportunities.filter(o=>o.id!==id);
+renderManage();notify("Opportunity deleted");
+}
+
+/* POST OPPORTUNITY */
+document.getElementById("opportunityForm").onsubmit=function(e){
+e.preventDefault();
+opportunities.unshift({
+id:Date.now(),
+title:document.getElementById("opTitle").value,
+category:document.getElementById("opCategory").value,
+applicants:0,
+status:"Active"
+});
+this.reset();
+renderManage();
+notify("Opportunity published successfully!");
+navigate("manage");
+};
+
+/* PROFILE */
+document.getElementById("orgForm").onsubmit=function(e){
+e.preventDefault();
+let name=document.getElementById("orgName").value;
+document.getElementById("orgNameTop").textContent=name;
+document.querySelector(".hero h1").textContent="Welcome, "+name+"! 👋";
+notify("Organization profile updated!");
+};
+
+/* SEARCH */
+document.getElementById("globalSearch").oninput=function(){
+let q=this.value.toLowerCase();
+navigate("talent");
+document.getElementById("talentSearch").value=q;
+renderTalent();
+};
+
+/* NOTIFICATIONS */
+function notify(message="You have 3 new notifications!"){
+let t=document.getElementById("toast");
+t.textContent=message;
+t.style.display="block";
+setTimeout(()=>t.style.display="none",2500);
+}
+
+/* INITIALIZE */
+renderTalent();
+renderApplications();
+renderManage();
+document.getElementById("recommendedTalent").innerHTML=talents.slice(0,3).map(talentCard).join("");
+
+</script>
+</body>
+</html>
